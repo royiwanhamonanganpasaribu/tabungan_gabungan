@@ -1,0 +1,338 @@
+
+Option Compare Database
+Public Function eff(jenis As String, pinjam As Double, flat As Double, bln As Byte) As Double
+Dim hasil As Double
+Dim ar(120, 3) As Double
+'ang pokok , ang bunga, os pokok
+Dim digit As Byte
+Dim teliti As Byte
+Dim awal As Double
+Dim cur As Byte
+Dim i As Integer
+Dim terus As Boolean
+Dim selisih As Double
+Dim tadinya As Double
+Dim angsuran As Double
+
+
+  teliti = 7
+  awal = 10
+  digit = 0
+  hasil = awal
+'  hasil = 29
+  tadinya = -9999999999#
+  If jenis = "A" Then
+    angsuran = Round((pinjam + (pinjam * flat / 1200 * (bln))) / (bln))
+    terus = True
+    ar(0, 0) = 0
+    ar(0, 1) = 0
+    ar(0, 2) = pinjam
+    ar(1, 0) = angsuran
+    ar(1, 1) = 0
+    ar(1, 2) = pinjam - angsuran
+    While terus
+      
+      For i = 2 To bln
+        ar(i, 1) = Round(ar(i - 1, 2) * hasil / 1200)
+        ar(i, 0) = angsuran - ar(i, 1)
+        ar(i, 2) = ar(i - 1, 2) - ar(i, 0)
+      Next
+      selisih = ar(bln, 2)
+      If Sgn(tadinya) <> Sgn(selisih) Then
+        If digit >= teliti Then
+          terus = False
+        Else
+          digit = digit + 1
+        End If
+      Else
+        
+      End If
+      If terus Then
+        If Sgn(selisih) = 0 Then
+            terus = False
+        ElseIf Sgn(selisih) = 1 Then
+            hasil = hasil - (10 ^ (0 - digit))
+        Else
+            hasil = hasil + (10 ^ (0 - digit))
+        End If
+          
+      End If
+'      terus = False
+      tadinya = selisih
+     
+    Wend
+   Else
+    angsuran = Round((pinjam + (pinjam * flat / 1200 * (bln))) / (bln))
+    terus = True
+    ar(0, 0) = 0
+    ar(0, 1) = 0
+    ar(0, 2) = pinjam
+'    ar(1, 0) = angsuran
+'    ar(1, 1) = 0
+'    ar(1, 2) = pinjam - angsuran
+    While terus
+      
+      For i = 1 To bln
+        ar(i, 1) = Round(ar(i - 1, 2) * hasil / 1200)
+        ar(i, 0) = angsuran - ar(i, 1)
+        ar(i, 2) = ar(i - 1, 2) - ar(i, 0)
+      Next
+      selisih = ar(bln, 2)
+      If Sgn(tadinya) <> Sgn(selisih) Then
+        If digit >= teliti Then
+          terus = False
+        Else
+          digit = digit + 1
+        End If
+      Else
+        
+      End If
+      If terus Then
+        If Sgn(selisih) = 0 Then
+            terus = False
+        ElseIf Sgn(selisih) = 1 Then
+            hasil = hasil - (10 ^ (0 - digit))
+        Else
+            hasil = hasil + (10 ^ (0 - digit))
+        End If
+          
+      End If
+'      terus = False
+      tadinya = selisih
+     
+    Wend
+   
+   End If
+  
+'  hasil = 30.71085
+  eff = Round(hasil, 5)
+End Function
+ 
+Private Sub ed_Click()
+    
+Dim value(120) As Double
+Dim b, a
+Dim m, it
+
+'  m := round($1);
+'  it := trunc(m/100);
+'  it := it *100;
+'  If it = m Then
+'    hasil = m;
+'  Else
+'    hasil = it+100;
+'  end if;
+'  return hasil;
+    
+  a = (Me.pinjaman_krd + (Me.pinjaman_krd * Me.bungaflat_krd / 1200 * Me.bln_krd)) / Me.bln_krd
+  m = Round(a)
+  it = Int(m / 100)
+  it = it * 100
+  If it = m Then
+'    a = m
+  Else
+'    a = it + 100
+  End If
+  
+  If Me.typebunga_krd = "R" Then
+'    a = (Me.pinjaman_krd + (Me.pinjaman_krd * Me.bungaflat_krd / 1200 * Me.bln_krd)) / Me.bln_krd
+'     a = Me.angsur_krd
+   
+    value(0) = 0 - Me.pinjaman_krd
+    For b = 1 To Me.bln_krd
+      value(b) = a
+    Next b
+    Me.satu = value(0)
+    Me.ang = value(1)
+' --------------------------------------------------------
+'    Me.ef = Round(IRR(value()) * 1200, 5)
+    Me.ef = eff(Me.typebunga_krd, Me.pinjaman_krd, Me.bungaflat_krd, Me.bln_krd)
+' --------------------------------------------------------
+  ElseIf Me.typebunga_krd = "A" Then
+  
+'    a = (Me.pinjaman_krd + (Me.pinjaman_krd * Me.bungaflat_krd / 1200 * Me.bln_krd)) / Me.bln_krd
+'     a = Me.angsur_krd
+    
+    value(0) = 0 - Me.pinjaman_krd + a
+    For b = 1 To Me.bln_krd - 1
+      value(b) = a
+    Next b
+    Me.satu = value(0)
+    Me.ang = value(1)
+'    Me.ef = Round(IRR(value()) * 1200, 5)
+    Me.ef = eff(Me.typebunga_krd, Me.pinjaman_krd, Me.bungaflat_krd, Me.bln_krd)
+    
+  Else
+    Me.ef = Me.bungaflat_krd
+    If Me.bln_krd = 1 Then
+      a = Me.pinjaman_krd + Me.pinjaman_krd * Me.bungaflat_krd / 1200
+    Else
+      a = Me.pinjaman_krd * Me.bungaflat_krd / 1200
+    End If
+    
+    m = Round(a)
+    it = Int(m / 100)
+    it = it * 100
+    If it = m Then
+      a = m
+    Else
+      a = it + 100
+    End If
+     
+'    Me.angsur_krd = a
+    Me.ang = a
+        
+'    DoCmd.DoMenuItem acFormBar, acRecordsMenu, acSaveRecord, , acMenuVer70
+
+  End If
+ 
+    
+    Me.bungaef_krd = Me.ef
+ '   Me.baki_krd = Me.baki_krd + 1
+    Me.Form.Repaint
+
+    Me.Form.Recalc
+    
+    Me.baki_krd = Me.baki_krd + 1
+    Me.Form.Recalc
+    
+    SendKeys "+~", 1
+    DoCmd.DoMenuItem acFormBar, acRecordsMenu, acSaveRecord, , acMenuVer70
+    Me.Form.Recalc
+    
+ '   DoCmd.DoMenuItem acFormBar, acRecordsMenu, acSaveRecord, , acMenuVer70
+
+'      MsgBox "Edging selesai"
+    Me.Form.Recalc
+    Me.Form.Repaint
+    Me.Edging.Form.Requery
+    
+Exit_ed_Click:
+    Exit Sub
+
+Err_ed_Click:
+    MsgBox Err.Description
+    Resume Exit_ed_Click
+    
+End Sub
+Private Sub edg_Click()
+On Error GoTo Err_edg_Click
+
+    Dim stDocName As String
+
+    stDocName = "Edging Kredit"
+    DoCmd.OpenReport stDocName, acPreview
+
+Exit_edg_Click:
+    Exit Sub
+
+Err_edg_Click:
+    MsgBox Err.Description
+    Resume Exit_edg_Click
+    
+End Sub
+Private Sub he_Click()
+On Error GoTo Err_he_Click
+Dim value(120) As Double
+Dim b, a
+
+  If Me.typebunga_krd = "R" Then
+    a = (Me.pinjaman_krd + (Me.pinjaman_krd * Me.bungaflat_krd / 1200 * Me.bln_krd)) / Me.bln_krd
+    
+    value(0) = 0 - Me.pinjaman_krd
+    For b = 1 To Me.bln_krd
+      value(b) = a
+    Next b
+    Me.satu = value(0)
+    Me.ang = value(1)
+    Me.ef = Round(IRR(value()) * 1200, 5)
+  ElseIf Me.typebunga_krd = "A" Then
+  
+    a = (Me.pinjaman_krd + (Me.pinjaman_krd * Me.bungaflat_krd / 1200 * Me.bln_krd)) / Me.bln_krd
+    
+    value(0) = 0 - Me.pinjaman_krd + a
+    For b = 1 To Me.bln_krd - 1
+      value(b) = a
+    Next b
+    Me.satu = value(0)
+    Me.ang = value(1)
+    Me.ef = Round(IRR(value()) * 1200, 5)
+    
+  Else
+    Me.ef = Me.bungaflat_krd
+    
+  End If
+    Me.bungaef_krd = Me.ef
+ '   Me.baki_krd = Me.baki_krd + 1
+    Me.Form.Repaint
+
+  Me.Form.Recalc
+Exit_he_Click:
+    Exit Sub
+
+Err_he_Click:
+    MsgBox Err.Description
+    Resume Exit_he_Click
+    
+End Sub
+
+Private Sub id_kar_KeyDown(KeyCode As Integer, Shift As Integer)
+If KeyCode = 13 Then
+  SendKeys "%e", wait
+End If
+End Sub
+
+Private Sub id_kar_KeyPress(KeyAscii As Integer)
+  If KeyAscii = 13 Then
+    SendKeys "%e", wait
+    KeyAscii = 0
+  End If
+  
+End Sub
+Private Sub save_Click()
+On Error GoTo Err_save_Click
+
+
+    DoCmd.DoMenuItem acFormBar, acRecordsMenu, acSaveRecord, , acMenuVer70
+
+Exit_save_Click:
+    Exit Sub
+
+Err_save_Click:
+    MsgBox Err.Description
+    Resume Exit_save_Click
+    
+End Sub
+Private Sub enas_Click()
+On Error GoTo Err_enas_Click
+
+    Dim stDocName As String
+
+    stDocName = "Edging Kredit"
+    DoCmd.OpenReport stDocName, acPreview
+
+Exit_enas_Click:
+    Exit Sub
+
+Err_enas_Click:
+    MsgBox Err.Description
+    Resume Exit_enas_Click
+    
+End Sub
+Private Sub edeb_Click()
+On Error GoTo Err_edeb_Click
+
+    Dim stDocName As String
+
+    stDocName = "Edging Kredit-nasabah"
+    DoCmd.OpenReport stDocName, acPreview
+
+Exit_edeb_Click:
+    Exit Sub
+
+Err_edeb_Click:
+    MsgBox Err.Description
+    Resume Exit_edeb_Click
+    
+End Sub
+
